@@ -1,3 +1,6 @@
+請直接複製以下內容。我已確保 Mermaid 區塊有明確的結束標籤 (```)。
+
+Markdown
 # 🪐 Castor-MLX (MLX-Project)
 
 本專案是一個專為 Apple Silicon (M3 晶片) 優化的本地大型語言模型（LLM）對話環境。採用 Apple 的 MLX 框架實現硬體加速，具備 LaTeX 數學公式渲染與自動化對話存檔功能。
@@ -27,6 +30,7 @@ graph TD
     STREAM -->|6. SSE 串流回傳| User
     STOP -.->|7. 結束資源佔用| User
     MLX -->|8. 存檔| SAV[data/sav/ 歷史紀錄]
+```
 後端 (Backend): FastAPI (Python 3.12)，負責模型載入、SSE 串流生成與 JSON 持久化。
 
 模型層 (Model): 支援 MLX 量化版本模型，預設路徑指向 models/current。
@@ -89,16 +93,15 @@ JSON
 }
 4. 執行應用
 Bash
-# 啟動服務
 uv run main.py
 啟動後訪問 http://127.0.0.1:8000。
 
-⚖️ 授權與聲明 (License & IP)
-Code: 採用 MIT License。
+⚖️ 授權與聲明
+Code: MIT License.
 
-Author: Michael (架構設計、資源管理邏輯、M3 硬體調試)。
+Author: Michael.
 
 AI Statement: 核心邏輯由 AI 協助生成，經人工審核與實機調試。
 
 🛡 隱私承諾
-本專案為純本地端執行。除必要的模型下載外，所有對話數據與運算皆不會離開您的設備。
+本地端執行。除模型下載外，所有數據與運算不離開設備。
