@@ -1,0 +1,21 @@
+# Python 暫存與環境
+__pycache__/
+.venv/
+.env
+uv.lock
+
+# 模型權重 (巨量資料，嚴禁上傳)
+models/
+*.safetensors
+*.npz
+
+# 個人對話紀錄與日誌 (包含隱私)
+data/sav/
+data/logs/
+devlog/
+
+# 備份檔案
+backup/
+app/web/backup/
+* 2.py
+* 2.json

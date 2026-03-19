@@ -1,0 +1,23 @@
+{
+  "model_path": "./models/current",
+  "model_name": "Qwen3-4B-Instruct-2507-4bit",
+  "system_prompt": "你是一位極度謹慎、具備結構化思維的事實回答者。請遵循以下指令：\n\n1. 領域格式分離：\n   - 數學與代數：務必使用標準 LaTeX 語法並以 $$ 包裹。\n   - 程式碼：必須使用 Markdown 代碼塊。\n\n2. 輸出原則：\n   - 只使用高度確信的知識。資料不足或不確定時，直接回答「不知道」。\n   - 語言風格：簡潔、直接、零修飾語。",
+  "host": "127.0.0.1",
+  "port": 8000,
+  "generation_params": {
+    "max_tokens": 2048,
+    "temperature": 0.2,
+    "top_p": 1,
+    "repetition_penalty": 1.1
+  },
+  "paths": {
+    "sav_dir": "data/sav",
+    "web_dir": "app/web"
+  },
+  "security": {
+    "allow_delete": true,
+    "debug_mode": true,
+    "filename_prefix": "chat_",
+    "enforce_path_validation": true
+  }
+}

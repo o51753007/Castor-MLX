@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Castor-MLX | M3 Powered</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --bg-dark: #131314; --bg-side: #1e1f20; --text-main: #e3e3e3; --accent-blue: #8ab4f8; --hover-gray: #3c4043; --error-red: #f85149; }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg-dark); color: var(--text-main); font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
+        
+        /* Sidebar & Toolbar */
+        .toolbar { position: absolute; left: 12px; top: 12px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; }
+        .icon-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: 0.2s; }
+        .icon-btn:hover { background: var(--hover-gray); }
+        
+        .sidebar { width: 280px; background: var(--bg-side); display: flex; flex-direction: column; transition: 0.3s; z-index: 100; border-right: 1px solid #30363d; }
+        .sidebar.collapsed { margin-left: -280px; }
+        .sidebar-header { padding: 120px 16px 12px; border-bottom: 1px solid #30363d; }
+        
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; cursor: pointer; color: #bdc1c6; transition: 0.2s; margin-bottom: 4px; font-size: 14px; }
+        .nav-item:hover { background: #2b2c2f; color: white; }
+        
+        .history-list { flex: 1; overflow-y: auto; padding: 12px; }
+        .history-item { height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-radius: 22px; cursor: pointer; font-size: 13px; margin-bottom: 4px; color: #bdc1c6; transition: 0.2s; }
+        .history-item:hover:not(.disabled) { background: #2b2c2f; }
+
+        /* 狀態鎖定樣式 */
+        .locked .history-item, .locked .nav-item { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+        .locked #userInput { background: #131314; color: #666; cursor: not-allowed; }
+
+        /* Main Area */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+        #chat-container { flex: 1; overflow-y: auto; padding: 60px 15% 20px; display: flex; flex-direction: column; gap: 32px; scroll-behavior: smooth; }
+        .msg { width: 100%; animation: fadeIn 0.3s ease; }
+        .user .content { background: #2b2c2f; padding: 14px 24px; border-radius: 24px; float: right; max-width: 80%; font-size: 16px; line-height: 1.6; white-space: pre-wrap; }
+        .assistant b { color: var(--accent-blue); display: block; margin-bottom: 8px; font-size: 12px; letter-spacing: 1px; }
+        .assistant .content { font-size: 16px; line-height: 1.6; }
+
+        /* Config Panel */
+        #config-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
+        .config-card { background: var(--bg-side); width: 480px; padding: 28px; border-radius: 16px; border: 1px solid #30363d; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        #params-container { max-height: 300px; overflow-y: auto; margin: 16px 0; padding-right: 10px; }
+        .param-row { margin-bottom: 16px; }
+        .param-row label { display: block; font-size: 12px; color: #9aa0a6; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .param-row input { width: 100%; background: #131314; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; }
+        
+        /* Prompt Editor */
+        .prompt-editor { border-top: 1px solid #30363d; padding-top: 16px; margin-top: 16px; }
+        #sys-prompt-input { width: 100%; height: 150px; background: #131314; border: 1px solid #30363d; color: #e3e3e3; padding: 12px; border-radius: 8px; resize: none; font-family: inherit; font-size: 14px; line-height: 1.5; outline: none; }
+        #sys-prompt-input:focus { border-color: var(--accent-blue); }
+
+        .btn-save { background: var(--accent-blue); color: #131314; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; margin-top: 20px; }
+        .btn-save:hover { filter: brightness(1.1); }
+
+        /* Input Area */
+        .input-area { padding-bottom: 40px; }
+        .input-wrap { max-width: 840px; margin: 0 auto; display: flex; align-items: flex-end; background: #1e1f20; border-radius: 24px; padding: 12px 20px; border: 1px solid #30363d; }
+        #input-status { font-weight: bold; font-size: 22px; margin-right: 12px; width: 28px; cursor: pointer; transition: 0.2s; }
+        .locked #input-status::after { content: '■'; color: var(--error-red); }
+        .ready #input-status::after { content: '>'; color: #3fb950; }
+        textarea { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 16px; line-height: 1.5; padding: 8px 0; resize: none; max-height: 200px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="ready">
+    <div class="toolbar">
+        <button class="icon-btn" title="切換選單" onclick="toggleSidebar()">☰</button>
+        <button class="icon-btn" id="btnNewChat" title="開啟新對話" onclick="newChat()">＋</button>
+    </div>
+
+    <div id="config-overlay" onclick="closeConfig()">
+        <div class="config-card" onclick="event.stopPropagation()">
+            <h3 style="margin:0 0 20px 0; color:var(--accent-blue)">系統配置與 Prompt 調試</h3>
+            
+            <div id="params-container"></div>
+            
+            <div class="prompt-editor">
+                <label style="display:block; font-size:12px; color:#9aa0a6; margin-bottom:8px;">SYSTEM PROMPT</label>
+                <textarea id="sys-prompt-input" placeholder="在這裡輸入系統指令..."></textarea>
+            </div>
+
+            <button class="btn-save" onclick="saveFullConfig()">套用並寫入存檔</button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="nav-item" onclick="openConfig()"><span>⚙️</span> 配置與 Prompt 編輯</div>
+        </div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+
+    <div class="main">
+        <div id="chat-container"></div>
+        <div class="input-area">
+            <div class="input-wrap">
+                <span id="input-status" onclick="handleStatusClick()"></span>
+                <textarea id="userInput" rows="1" placeholder="輸入訊息... (Cmd+Enter 發送)" oninput="autoResize(this)" onfocus="autoCollapse()"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let history = [];
+        let currentChatId = null;
+        let isLocked = false;
+        let abortController = null;
+
+        marked.setOptions({ 
+            breaks: true, 
+            highlight: (code, lang) => {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, { language }).value;
+            }
+        });
+
+        function renderMarkdown(text) {
+            return typeof marked !== 'undefined' ? marked.parse(text) : text;
+        }
+
+        async function init() {
+            newChat();
+            loadFiles();
+            document.getElementById('userInput').addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isLocked) {
+                    e.preventDefault();
+                    submitMessage();
+                }
+            });
+        }
+
+        // 開啟配置面板並拉取當前資料
+        async function openConfig() {
+            const res = await fetch('/api/config');
+            const data = await res.json();
+            
+            const container = document.getElementById('params-container');
+            container.innerHTML = '';
+            
+            const params = data.config.generation_params || {};
+            const melted = new Set(data.melted_params || []);
+
+            Object.keys(params).forEach(key => {
+                const isMelted = melted.has(key);
+                const row = document.createElement('div');
+                row.className = 'param-row';
+                row.innerHTML = `
+                    <label>${key.replace(/_/g, ' ')} ${isMelted ? '<span style="color:var(--error-red)">(不相容)</span>' : ''}</label>
+                    <input type="number" step="0.05" id="cfg-${key}" 
+                           value="${params[key]}" ${isMelted ? 'disabled' : ''}>
+                `;
+                container.appendChild(row);
+            });
+
+            // 填入 System Prompt
+            document.getElementById('sys-prompt-input').value = data.config.system_prompt || "";
+            document.getElementById('config-overlay').style.display = 'flex';
+        }
+
+        function closeConfig() { document.getElementById('config-overlay').style.display = 'none'; }
+
+        // 整合儲存：參數 + Prompt
+        async function saveFullConfig() {
+            const inputs = document.querySelectorAll('#params-container input:not(:disabled)');
+            const genParams = {};
+            inputs.forEach(input => {
+                genParams[input.id.replace('cfg-', '')] = parseFloat(input.value);
+            });
+
+            const payload = {
+                generation_params: genParams,
+                system_prompt: document.getElementById('sys-prompt-input').value
+            };
+            
+            const res = await fetch('/api/config/update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) closeConfig();
+        }
+
+        async function askAI(text) {
+            const welcome = document.getElementById('welcome-screen');
+            if (welcome) welcome.remove();
+            
+            appendMsg('user', text);
+            setLock(true);
+            history.push({ role: "user", content: text });
+            
+            const aiDisplay = appendMsg('assistant', "");
+            abortController = new AbortController();
+
+            try {
+                const res = await fetch('/chat', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ messages: history, chat_id: currentChatId }),
+                    signal: abortController.signal
+                });
+                
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = "";
+
+                while (true) {
+                    const {value, done} = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const rawData = line.slice(6).trim();
+                            if (rawData === '[DONE]') break;
+                            try {
+                                const data = JSON.parse(rawData);
+                                if (data.chat_id) currentChatId = data.chat_id;
+                                if (data.token) {
+                                    fullText += data.token;
+                                    aiDisplay.innerHTML = renderMarkdown(fullText);
+                                } 
+                            } catch(e) {}
+                        }
+                    }
+                    document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+                }
+                history.push({ role: "assistant", content: fullText });
+                if (window.MathJax) await MathJax.typesetPromise([aiDisplay]);
+            } catch (e) {
+                if (e.name !== 'AbortError') aiDisplay.innerHTML = "連線中斷或伺服器異常";
+            }
+            setLock(false);
+            loadFiles();
+        }
+
+        function setLock(state) {
+            isLocked = state;
+            document.body.className = state ? 'locked' : 'ready';
+            document.getElementById('userInput').disabled = state;
+        }
+
+        function appendMsg(role, text) {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            div.innerHTML = role === 'user' 
+                ? `<div class="content">${text}</div>` 
+                : `<b>CASTOR-MLX</b><div class="content">...</div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div.querySelector('.content');
+        }
+
+        async function loadFiles() {
+            try {
+                const res = await fetch('/api/files');
+                const files = await res.json();
+                const list = document.getElementById('historyList');
+                list.innerHTML = files.map(f => `
+                    <div class="history-item" onclick="!isLocked && loadHistory('${f}')">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.replace('chat_', '').replace('.json', '')}</span>
+                        <span onclick="event.stopPropagation(); !isLocked && deleteFile('${f}')" style="opacity:0.5; padding:4px;">🗑️</span>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        async function loadHistory(filename) {
+            const res = await fetch(`/api/history/${filename}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            history = data;
+            currentChatId = filename;
+            const container = document.getElementById('chat-container');
+            container.innerHTML = '';
+            history.forEach(m => {
+                const content = appendMsg(m.role, m.content);
+                content.innerHTML = renderMarkdown(m.content);
+            });
+            if(window.MathJax) MathJax.typesetPromise();
+        }
+
+        async function deleteFile(filename) {
+            if(!confirm('確定刪除？')) return;
+            const res = await fetch(`/api/files/${filename}`, { method: 'DELETE' });
+            if(res.ok) {
+                if(currentChatId === filename) newChat();
+                loadFiles();
+            }
+        }
+
+        function newChat() {
+            if (isLocked) return;
+            history = []; 
+            currentChatId = null;
+            document.getElementById('chat-container').innerHTML = `
+                <div id="welcome-screen" style="text-align:center; margin-top:15vh;">
+                    <h1 style="font-size:48px; color:var(--accent-blue); margin-bottom:10px;">Castor-MLX</h1>
+                    <p style="color:#9aa0a6;">Apple Silicon M3 優化推論環境</p>
+                </div>`;
+            setLock(false);
+        }
+
+        function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        function autoCollapse() { document.getElementById('sidebar').classList.add('collapsed'); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+        function handleStatusClick() { if (isLocked) abortController.abort(); else submitMessage(); }
+        function submitMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if(text && !isLocked) { input.value = ''; input.style.height = 'auto'; askAI(text); }
+        }
+
+        init();
+    </script>
+</body>
+</html>
