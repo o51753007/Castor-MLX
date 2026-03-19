@@ -1,24 +1,19 @@
-# Python 暫存與環境
+# System
+.DS_Store
+.ipynb_checkpoints/
 __pycache__/
-.venv/
-.env
-uv.lock
+.python-version
 
-# 模型權重 (巨量資料，嚴禁上傳)
-models/
-*.safetensors
-*.npz
-
-# 個人對話紀錄與日誌 (包含隱私)
+# Project Private Data
 data/sav/
 data/logs/
 devlog/
 
-# 備份檔案
-backup/
-app/web/backup/
-* 2.py
-* 2.json
-.DS_Store
-.ipynb_checkpoints/
-.python-version
+# Model Weights
+models/
+*.safetensors
+*.npz
+
+# UV Environment
+.venv/
+uv.lock
