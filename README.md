@@ -16,8 +16,7 @@
     STREAM -->|6. SSE 串流回傳| User
     STOP -.->|7. 結束資源佔用| User
     MLX -->|8. 存檔| SAV[data/sav/ 歷史紀錄]
-後端 (Backend): FastAPI (Python 3.12)，負責模型載入、SSE 串流生成與 JSON 持久化。模型層 (Model): 支援 MLX 量化版本模型，預設路徑指向 models/current。前端 (Frontend): 原生 JavaScript + Marked.js + MathJax，支援複雜數學公式與程式碼高亮。環境管理: 使用 uv 進行相依性鎖定與虛擬環境管理。🌟 技術實作特色資源防禦機制 (Resource Guard)針對 MacBook Air 續航優化。當使用者關閉瀏覽器分頁時，後端透過 request.is_disconnected() 立即停止 GPU 運算，確保電力不被浪費。高效推理循環 (Efficient Inference)直接調用 mlx_lm.stream_generate。針對 Apple Silicon 的統一記憶體架構（UMA）進行調校，在 M3 晶片上實現極低延遲。輕量化持久層
-無資料庫設計。透過 JSON 序列化將紀錄存於 data/sav/，並自動過濾 system_prompt 優化顯示邏輯。📂 檔案結構說明.
+後端 (Backend): FastAPI (Python 3.12)，負責模型載入、SSE 串流生成與 JSON 持久化。模型層 (Model): 支援 MLX 量化版本模型，預設路徑指向 models/current。前端 (Frontend): 原生 JavaScript + Marked.js + MathJax，支援複雜數學公式與程式碼高亮。環境管理: 使用 uv 進行相依性鎖定與虛擬環境管理。🌟 技術實作特色資源防禦機制 (Resource Guard)針對 MacBook Air 續航優化。當使用者關閉瀏覽器分頁時，後端透過 request.is_disconnected() 立即停止 GPU 運算，確保電力不被浪費。高效推理循環 (Efficient Inference)直接調用 mlx_lm.stream_generate。針對 Apple Silicon 的統一記憶體架構（UMA）進行調校，在 M3 晶片上實現極低延遲。輕量化持久層無資料庫設計。透過 JSON 序列化將紀錄存於 data/sav/，並自動過濾 system_prompt 優化顯示邏輯。📂 檔案結構說明.
 ├── app/
 │   └── web/            # 前端靜態資源 (index.html)
 ├── data/
