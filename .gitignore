@@ -19,3 +19,6 @@ backup/
 app/web/backup/
 * 2.py
 * 2.json
+.DS_Store
+.ipynb_checkpoints/
+.python-version
