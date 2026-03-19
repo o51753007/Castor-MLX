@@ -45,4 +45,5 @@ ln -sfn ./Qwen2.5-4B-Instruct-4bit ./models/current
 }
 4. 執行應用# 啟動服務
 uv run main.py
-啟動後訪問 http://127.0.0.1:8000。⚖️ 授權與聲明 (License & IP)Code: 採用 MIT License。Author: Michael (架構設計、資源管理邏輯、M3 硬體調試)。AI Statement: 核心邏輯由 AI 協助生成，經人工審核與實機調試。🛡 隱私承諾本專案為純本地端執行。除必要的模型下載外，所有對話數據與運算皆不會離開您的設備。
+啟動後訪問 http://127.0.0.1:8000。
+⚖️ 授權與聲明 (License & IP)Code: 採用 MIT License。Author: Michael (架構設計、資源管理邏輯、M3 硬體調試)。AI Statement: 核心邏輯由 AI 協助生成，經人工審核與實機調試。🛡 隱私承諾本專案為純本地端執行。除必要的模型下載外，所有對話數據與運算皆不會離開您的設備。
