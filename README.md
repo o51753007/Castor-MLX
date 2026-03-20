@@ -111,6 +111,6 @@ uv run main.py
 
 ## ⚖️ 授權與聲明
 * **Code**: MIT License.
-* **Author**: Michael.
+* **Author**: o51753007 RadioTuning Michael.
 * **AI Statement**: 核心邏輯由 AI 協助生成，經人工審核與實機調試。
 * **🛡 隱私承諾**: 本地端執行。除模型下載外，所有數據與運算不離開設備。
