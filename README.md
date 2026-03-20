@@ -1,4 +1,3 @@
-```markdown
 # 🪐 Castor-MLX (MLX-Project)
 
 本專案是一個專為 **Apple Silicon (M3 晶片)** 優化的本地大型語言模型（LLM）對話環境。採用 Apple 的 **MLX 框架** 實現硬體加速，具備 LaTeX 數學公式渲染與自動化對話存檔功能。
@@ -115,4 +114,3 @@ uv run main.py
 * **Author**: Michael.
 * **AI Statement**: 核心邏輯由 AI 協助生成，經人工審核與實機調試。
 * **🛡 隱私承諾**: 本地端執行。除模型下載外，所有數據與運算不離開設備。
-```
